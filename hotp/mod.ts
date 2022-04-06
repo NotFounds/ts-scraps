@@ -2,7 +2,7 @@ import { crypto } from "./deps.ts";
 
 export class HOTP {
   static dynamicTruncate(HS: Uint8Array) {
-    const offset = HS[19] & 0x0f;
+    const offset = HS[19] & 0xf;
     const P = HS.slice(offset, offset + 4)
                 .reduce((acc, cur) => acc << 8 | (cur & 0xff), 0);
     return P & 0x7fffffff;
@@ -24,20 +24,7 @@ export class HOTP {
 
     // Step 2: Generate a 4-byte string (Dynamic Truncation)
     // Step 3: Compute an HOTP value
-    return HOTP.dynamicTruncate(HS) % 10 ** digits;
-  }
-
-  static async generate256(C: Uint8Array, K: Uint8Array, digits = 6) {
-    const key = await crypto.subtle.importKey("raw", K, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-    const sign = await crypto.subtle.sign("HMAC", key, C);
-    const HS = new Uint8Array(sign);
-    return HOTP.dynamicTruncate(HS) % 10 ** digits;
-  }
-
-  static async generate512(C: Uint8Array, K: Uint8Array, digits = 6) {
-    const key = await crypto.subtle.importKey("raw", K, { name: "HMAC", hash: "SHA-512" }, false, ["sign"]);
-    const sign = await crypto.subtle.sign("HMAC", key, C);
-    const HS = new Uint8Array(sign);
-    return HOTP.dynamicTruncate(HS) % 10 ** digits;
+    const P = await HOTP.dynamicTruncate(HS) % 10 ** digits;
+    return P.toString().padStart(digits, "0");
   }
 }
