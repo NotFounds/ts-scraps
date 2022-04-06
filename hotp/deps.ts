@@ -1,1 +1,1 @@
-export { hmac } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
+export { crypto } from "https://deno.land/std@0.133.0/crypto/mod.ts";

@@ -1,4 +1,4 @@
-import { hmac } from "./deps.ts";
+import { crypto } from "./deps.ts";
 
 export class HOTP {
   static dynamicTruncate(HS: Uint8Array) {
@@ -15,12 +15,29 @@ export class HOTP {
    * @param digits number of digits in an HOTP value; system parameter.
    * @returns HOTP
    */
-  static generate(C: Uint8Array, K: Uint8Array, digits = 6) {
+  static async generate(C: Uint8Array, K: Uint8Array, digits = 6) {
     // Step 1: Generate an HMAC-SHA-1 value
-    const HS = hmac("sha1", K, C) as Uint8Array; // HS is a 20-byte string
+    // HS is a 20-byte string
+    const key = await crypto.subtle.importKey("raw", K, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]);
+    const sign = await crypto.subtle.sign("HMAC", key, C);
+    const HS = new Uint8Array(sign);
 
     // Step 2: Generate a 4-byte string (Dynamic Truncation)
     // Step 3: Compute an HOTP value
+    return HOTP.dynamicTruncate(HS) % 10 ** digits;
+  }
+
+  static async generate256(C: Uint8Array, K: Uint8Array, digits = 6) {
+    const key = await crypto.subtle.importKey("raw", K, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+    const sign = await crypto.subtle.sign("HMAC", key, C);
+    const HS = new Uint8Array(sign);
+    return HOTP.dynamicTruncate(HS) % 10 ** digits;
+  }
+
+  static async generate512(C: Uint8Array, K: Uint8Array, digits = 6) {
+    const key = await crypto.subtle.importKey("raw", K, { name: "HMAC", hash: "SHA-512" }, false, ["sign"]);
+    const sign = await crypto.subtle.sign("HMAC", key, C);
+    const HS = new Uint8Array(sign);
     return HOTP.dynamicTruncate(HS) % 10 ** digits;
   }
 }
