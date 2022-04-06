@@ -1,1 +1,1 @@
-export { HOTP } from "https://github.com/NotFounds/ts-scraps/blob/main/hotp/mod.ts";
+export { decode as base32Decode } from "https://deno.land/std@0.133.0/encoding/base32.ts";
