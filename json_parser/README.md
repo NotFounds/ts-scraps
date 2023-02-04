@@ -1,3 +1,6 @@
+## json_parser
+
+```ts
 import { MyJSON, Tokenizer } from "./mod.ts";
 
 const rawJson = `
@@ -10,6 +13,7 @@ const rawJson = `
 }
 `;
 
-console.log(JSON.parse(rawJson))
 console.log(MyJSON.parse(rawJson));
+```
+
 
