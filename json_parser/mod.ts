@@ -37,10 +37,11 @@ class JSONParser {
       case JSONToken.False:
         return false;
     }
+    throw Error("Syntax error");
   }
 
   private parseObject(): JSONValue {
-    const result: Record<string, unknown> = {};
+    const result: { [key: string]: JSONValue; } = {};
     let isFirst = true;
     while (true) {
       const t1 = this.getNext();
@@ -64,7 +65,7 @@ class JSONParser {
   }
 
   private parseArray(): JSONValue {
-    const result: Array<unknown> = [];
+    const result: Array<JSONValue> = [];
     let isFirst = true;
     while (true) {
       const t1 = this.getNext();
@@ -80,7 +81,7 @@ class JSONParser {
 }
 
 type JSONValue =
-  Record<string, JSONValue>
+  | { [key: string]: JSONValue }
   | Array<JSONValue>
   | string
   | number

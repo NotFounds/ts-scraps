@@ -1,4 +1,4 @@
-import { MyJSON, Tokenizer } from "./mod.ts";
+import { MyJSON } from "./mod.ts";
 
 const rawJson = `
 {
