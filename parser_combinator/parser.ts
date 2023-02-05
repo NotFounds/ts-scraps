@@ -105,6 +105,7 @@ export abstract class ParserBase {
   protected and<T extends Parser<unknown>[]>(...parsers: T): Parser<{ [K in keyof T]: ParseResultType<T[K]> }> {
     return () => {
       const pos = this.#sc.cursor();
+      // deno-lint-ignore no-explicit-any
       const res: { [K in keyof T]: ParseResultType<T[K]>; } = [] as any;
 
       for (const k in parsers) {
