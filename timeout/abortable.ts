@@ -8,6 +8,7 @@ async function heavyProcess() {
 
 function handleAborted() { Promise.reject(signal.reason); }
 function makeAbortable<T>(promise: Promise<T>): (signal: AbortSignal) => Promise<T> {
+  if (signal.aborted) handleAborted();
   return async (signal: AbortSignal) => {
     signal.addEventListener('abort', handleAborted, { once: true });
     try {
