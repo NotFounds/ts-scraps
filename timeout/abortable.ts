@@ -7,19 +7,21 @@ async function heavyProcess() {
 }
 
 function handleAborted() { Promise.reject(signal.reason); }
-async function abortablePromise<T>(promise: Promise<T>, signal: AbortSignal) {
-  signal.addEventListener('abort', handleAborted, { once: true });
-  try {
-    const result = await promise;
-    return Promise.resolve(result);
-  }
-  catch (e) {
-    return Promise.reject(e);
-  }
-  finally {
-    signal.removeEventListener('abort', handleAborted);
-  }
+function makeAbortable<T>(promise: Promise<T>): (signal: AbortSignal) => Promise<T> {
+  return async (signal: AbortSignal) => {
+    signal.addEventListener('abort', handleAborted, { once: true });
+    try {
+      const result = await promise;
+      return Promise.resolve(result);
+    }
+    catch (e) {
+      return Promise.reject(e);
+    }
+    finally {
+      signal.removeEventListener('abort', handleAborted);
+    }
+  };
 }
 
 const signal = AbortSignal.timeout(1000);
-await abortablePromise(heavyProcess(), signal);
+await makeAbortable(heavyProcess())(signal);
