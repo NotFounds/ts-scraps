@@ -1,12 +1,25 @@
-async function heavyProcess(signal: AbortSignal) {
-  signal.addEventListener('abort', () => Promise.reject(signal.reason), { once: true });
-
+async function heavyProcess() {
   for (let i = 0; i < 10; i++) {
     await new Promise((r) => setTimeout(() => r(undefined), 100));
     console.log(i);
   }
-  Promise.resolve(undefined);
+  return undefined;
+}
+
+function handleAborted() { Promise.reject(signal.reason); }
+async function abortablePromise<T>(promise: Promise<T>, signal: AbortSignal) {
+  signal.addEventListener('abort', handleAborted, { once: true });
+  try {
+    const result = await promise;
+    return Promise.resolve(result);
+  }
+  catch (e) {
+    return Promise.reject(e);
+  }
+  finally {
+    signal.removeEventListener('abort', handleAborted);
+  }
 }
 
 const signal = AbortSignal.timeout(1000);
-await heavyProcess(signal);
+await abortablePromise(heavyProcess(), signal);
